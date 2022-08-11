@@ -235,24 +235,33 @@ async fn monitor_thread(db: db::DBMS, board: &str, thread: u64, interval: Durati
 struct Args {
     #[clap(subcommand)]
     command: Command,
-
-    #[clap(long, default_value = ".")]
-    db: String,
-
-    #[clap(long)]
-    board: String,
-
-    #[clap(long)]
-    thread: Option<u64>,
 }
 
 #[derive(clap::Subcommand)]
 enum Command {
     Monitor {
+        #[clap(long, default_value = ".")]
+        db: String,
+
+        #[clap(long)]
+        board: String,
+
+        #[clap(long)]
+        thread: Option<u64>,
+
         #[clap(long, default_value = "0")]
         interval: u64,
     },
-    Dump,
+    Dump {
+        #[clap(long, default_value = ".")]
+        db: String,
+
+        #[clap(long)]
+        board: String,
+
+        #[clap(long)]
+        thread: Option<u64>,
+    },
 }
 
 #[tokio::main]
@@ -261,29 +270,37 @@ async fn main() {
 
     let args = Args::parse();
 
-    let db = db::DBMS::new(PathBuf::from(args.db));
-
     match &args.command {
-        Command::Monitor { interval } => match args.thread {
+        Command::Monitor {
+            db,
+            board,
+            thread,
+            interval,
+        } => match thread {
             None => {
-                monitor_board(db, args.board, Duration::from_secs(*interval)).await;
+                monitor_board(
+                    db::DBMS::new(PathBuf::from(db)),
+                    board.clone(),
+                    Duration::from_secs(*interval),
+                )
+                .await;
             }
             Some(thread) => {
                 monitor_thread(
-                    db,
-                    args.board.as_str(),
-                    thread,
+                    db::DBMS::new(PathBuf::from(db)),
+                    board.as_str(),
+                    *thread,
                     Duration::from_secs(*interval),
                 )
                 .await;
             }
         },
-        Command::Dump => match args.thread {
+        Command::Dump { db, board, thread } => match thread {
             None => {
-                dump_board(db, args.board).await;
+                dump_board(db::DBMS::new(PathBuf::from(db)), board.clone()).await;
             }
             Some(thread) => {
-                dump_thread(db, args.board.as_str(), thread).await;
+                dump_thread(db::DBMS::new(PathBuf::from(db)), board.as_str(), *thread).await;
             }
         },
     }

@@ -3,5 +3,5 @@
 
 ```sh
 cargo build --release
-RUST_LOG=info ./target/release/crawler-2ch --db ~/tmp/2ch-db --board b monitor --interval 300
+RUST_LOG=info ./target/release/crawler-2ch monitor --db ~/tmp/2ch-db --board b --interval 300
 ```
