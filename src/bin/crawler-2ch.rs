@@ -257,9 +257,7 @@ enum Command {
 
 #[tokio::main]
 async fn main() {
-    env_logger::Builder::from_default_env()
-        .target(env_logger::Target::Stdout)
-        .init();
+    env_logger::Builder::from_default_env().init();
 
     let args = Args::parse();
 
