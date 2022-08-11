@@ -127,14 +127,17 @@ impl API {
             .await;
 
         if let Err(err) = response {
-            error!("Failed to fetch thread {} {}: {}", board_id, thread_id, err);
+            error!(
+                "Failed to fetch thread /{}/{}: {}",
+                board_id, thread_id, err
+            );
             return None;
         }
         let response = response.unwrap();
 
         if response.status() != reqwest::StatusCode::OK {
             error!(
-                "Failed to fetch thread {} {}: {}",
+                "Failed to fetch thread /{}/{}: {}",
                 board_id,
                 thread_id,
                 response.status()
@@ -144,10 +147,10 @@ impl API {
 
         return if let Ok(text) = response.text().await {
             let thread: Thread = serde_json::from_str(&text).expect("failed to parse thread json");
-            debug!("Successfully fetched thread {} {}", board_id, thread_id);
+            debug!("Successfully fetched thread /{}/{}", board_id, thread_id);
             Some(thread)
         } else {
-            error!("Failed to get thread body {} {}", board_id, thread_id);
+            error!("Failed to get thread body /{}/{}", board_id, thread_id);
             None
         };
     }

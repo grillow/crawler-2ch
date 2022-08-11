@@ -33,7 +33,7 @@ async fn dump_board(db: db::DBMS, board: String) {
         .map(|thread| thread.num /*.parse::<u64>().unwrap()*/)
         .collect();
 
-    info!("Fetched {} catalogue with {} posts", board, threads.len());
+    info!("Fetched /{}/ catalogue with {} posts", board, threads.len());
 
     let tasks: Vec<_> = threads
         .into_iter()
@@ -43,7 +43,7 @@ async fn dump_board(db: db::DBMS, board: String) {
             tokio::spawn(async move {
                 let success = dump_thread(db, board.as_str(), thread.clone()).await;
                 if !success {
-                    error!("Failed to dump thread {} {}", board, thread);
+                    error!("Failed to dump thread /{}/{}", board, thread);
                 }
             })
         })
@@ -53,7 +53,7 @@ async fn dump_board(db: db::DBMS, board: String) {
         match task.await {
             Ok(_) => {}
             Err(e) => {
-                error!("Failed to dump thread on board {}: {}", board, e);
+                error!("Failed to dump thread on board /{}/: {}", board, e);
             }
         }
     }
@@ -66,7 +66,7 @@ async fn dump_thread(db: db::DBMS, board: &str, thread: u64) -> bool {
     let fetched = api.fetch_thread(board, thread).await;
 
     if let None = fetched {
-        error!("Failed to fetch thread {} {}", board, thread);
+        error!("Failed to fetch thread /{}/{}", board, thread);
         return false;
     }
     let fetched = fetched.unwrap();
@@ -84,7 +84,7 @@ async fn dump_thread(db: db::DBMS, board: &str, thread: u64) -> bool {
 
     if discovered {
         info!(
-            "Discovered new thread {} {} with {} posts",
+            "Discovered new thread /{}/{} with {} posts",
             board,
             thread,
             fetched.threads.thread.posts.len()
@@ -105,16 +105,16 @@ async fn dump_thread(db: db::DBMS, board: &str, thread: u64) -> bool {
     );
 
     if !discovered && deleted.is_empty() && added.is_empty() {
-        info!("Nothing new in thread {} {}", board, thread);
+        info!("Nothing new in thread /{}/{}", board, thread);
         return true;
     }
 
     if !discovered && !added.is_empty() {
-        info!("Thread {} {} - {} new posts", board, thread, added.len());
+        info!("Thread /{}/{} - {} new posts", board, thread, added.len());
     }
     if !discovered && !deleted.is_empty() {
         warn!(
-            "Thread {} {} - {} deleted posts",
+            "Thread /{}/{} - {} deleted posts",
             board,
             thread,
             deleted.len(),
@@ -203,18 +203,18 @@ async fn dump_thread(db: db::DBMS, board: &str, thread: u64) -> bool {
     };
 
     db.write_thread(board, &thread);
-    info!("Dumped thread {} {}", board, thread.id);
+    info!("Dumped thread /{}/{}", board, thread.id);
     true
 }
 
 async fn monitor_board(db: db::DBMS, board: String, interval: Duration) {
     loop {
         dump_board(db.clone(), board.clone()).await;
-        info!("Dumped board {}", board);
+        info!("Dumped board /{}/", board);
         // TODO: stop on error
         thread::sleep(interval);
     }
-    info!("Finished monitoring board {}", board);
+    info!("Finished monitoring board /{}/", board);
 }
 
 async fn monitor_thread(db: db::DBMS, board: &str, thread: u64, interval: Duration) {
@@ -222,15 +222,15 @@ async fn monitor_thread(db: db::DBMS, board: &str, thread: u64, interval: Durati
         let success = dump_thread(db.clone(), board, thread).await;
 
         if success {
-            info!("Dumped thread {} {}", board, thread);
+            info!("Dumped thread /{}/{}", board, thread);
         } else {
-            info!("Failed to dump thread {} {}", board, thread);
+            info!("Failed to dump thread /{}/{}", board, thread);
             break;
         }
 
         thread::sleep(interval);
     }
-    info!("Finished monitoring thread {} {}", board, thread);
+    info!("Finished monitoring thread /{}/{}", board, thread);
 }
 
 #[derive(Parser)]

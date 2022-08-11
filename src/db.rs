@@ -61,7 +61,7 @@ impl DBMS {
                     .collect(),
             ),
             Err(e) => {
-                error!("Failed to read board {}: {}", board_id, e);
+                error!("Failed to read board /{}/: {}", board_id, e);
                 None
             }
         }
@@ -74,13 +74,13 @@ impl DBMS {
             .join(&board_id)
             .join(format!("{}.json", thread_id));
         if !filepath.exists() {
-            debug!("Thread {} {} does not exist in db", board_id, thread_id);
+            debug!("Thread /{}/{} does not exist in db", board_id, thread_id);
             return None;
         }
 
         let file = fs::File::open(filepath).expect("failed to open <thread>.json");
         let thread: Thread = serde_json::from_reader(file).expect("failed to parse <thread>.json");
-        debug!("Sucessfully read thread {} {} from db", board_id, thread_id);
+        debug!("Sucessfully read thread /{}/{} from db", board_id, thread_id);
         Some(thread)
     }
 
@@ -91,7 +91,7 @@ impl DBMS {
         let filepath = &board_dir.join(format!("{}.json", &thread.id));
         fs::write(filepath, serde_json::to_string_pretty(&thread).unwrap())
             .expect("failed to write <thread>.json");
-        debug!("Successfully wrote thread {} {} to db", board_id, thread.id);
+        debug!("Successfully wrote thread /{}/{} to db", board_id, thread.id);
     }
 
     pub fn read_attachment(&self, attachment_id: &str) -> Option<Vec<u8>> {
