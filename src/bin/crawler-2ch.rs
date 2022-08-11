@@ -1,7 +1,5 @@
-mod api;
-mod db;
-
 use clap::Parser;
+use crawler_2ch::{api, db};
 use log::{error, info, warn};
 use std::collections::HashSet;
 use std::ffi::OsStr;
@@ -214,7 +212,7 @@ async fn monitor_board(db: db::DBMS, board: String, interval: Duration) {
         // TODO: stop on error
         thread::sleep(interval);
     }
-    info!("Finished monitoring board /{}/", board);
+    // info!("Finished monitoring board /{}/", board);
 }
 
 async fn monitor_thread(db: db::DBMS, board: &str, thread: u64, interval: Duration) {
