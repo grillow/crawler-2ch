@@ -31,7 +31,7 @@ async fn dump_board(db: db::DBMS, board: String) {
         .map(|thread| thread.num /*.parse::<u64>().unwrap()*/)
         .collect();
 
-    info!("Fetched /{}/ catalogue with {} posts", board, threads.len());
+    info!("Fetched /{}/ catalogue with {} threads", board, threads.len());
 
     let tasks: Vec<_> = threads
         .into_iter()
