@@ -18,5 +18,4 @@ tokio = { version = "1.20.1", features = ["full"] }
 [profile.release]
 strip = true
 lto = true
-codegen-units = 1
 
